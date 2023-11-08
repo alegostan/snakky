@@ -5,7 +5,7 @@ body {
 
 #playground {
     margin: 0 auto;
-    width: 50vw;
+    width: 100vh;
     height: 100vh;
     background-color: aquamarine;
     display: flex;
@@ -17,15 +17,22 @@ body {
 .snake-block {
     position: absolute;
     display: block;
-    width: 10%;
-    height: 10%;
+    width: 2%;
+    height: 2%;
     background-color: green;
 }
+.food-block {
+    position: absolute;
+    display: block;
+    width: 2%;
+    height: 2%;
+    background-color: red;
+}
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 768px) {
     #playground {
-        margin-top: 25vh;
+        margin-top: auto;
         width: 100vw;
-        height: 50vh;
+        height: 100vw;
     }
 }

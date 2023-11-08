@@ -1,8 +1,9 @@
-const playGroundSize = 10;
+const playGroundSize = 50;
 const snake = {
     body: [],
     direction: "",
 };
+var food = { x: 20, y: 10 };
 
 snake.body.push({ x: 5, y: 3 });
 snake.body.push({ x: 5, y: 4 });
@@ -12,7 +13,6 @@ snake.body.push({ x: 5, y: 7 });
 
 function calculateNextCell(direction) {
     let nextPosition = { ...snake.body[0] };
-    console.log("head", nextPosition);
     switch (direction) {
         case "Up":
             if (nextPosition.y === 1) {
@@ -47,39 +47,47 @@ function calculateNextCell(direction) {
         default:
             break;
     }
-    console.log("newhead", nextPosition);
 
     return nextPosition;
 }
 
 function move() {
     const nextCell = calculateNextCell(snake.direction);
+    if (nextCell.x == food.x && nextCell.y == food.y) {
+        snake.body.unshift(nextCell);
+        placeFood();
+    }
+
     snake.body.unshift(nextCell);
     snake.body.pop();
-    renderSnake();
+
+    renderScene();
 }
 
-function renderSnake() {
+function renderScene() {
     const playground = document.getElementById("playground");
+    let foodBlock = `<div style="\
+    left: ${getOffsets(food.x)}; \
+    top: ${getOffsets(food.y)};" \
+    class="food-block"></div>`;
+
     playground.innerHTML = "";
+    playground.insertAdjacentHTML("beforeend", foodBlock);
 
-    snake.body.forEach((segment, index) => {
-        const renderBody = `<div class="snake-block">${index + 1}</div>`;
-        playground.insertAdjacentHTML("beforeend", renderBody);
-        const renderedBlock = document.querySelectorAll(
-            ".snake-block:last-child"
-        )[0];
-
-        const topPosition = (segment.x - 1) * (100 / playGroundSize) + "%";
-        const leftPosition = (segment.y - 1) * (100 / playGroundSize) + "%";
-
-        renderedBlock.style.left = topPosition;
-        renderedBlock.style.top = leftPosition;
+    snake.body.forEach((segment) => {
+        let snakeBlock = `<div style="\
+        left: ${getOffsets(segment.x)}; \
+        top: ${getOffsets(segment.y)};" \
+        class="snake-block"></div>`;
+        playground.insertAdjacentHTML("beforeend", snakeBlock);
     });
 }
 
+function getOffsets(offset) {
+    return (offset - 1) * (100 / playGroundSize) + "%";
+}
+
 window.addEventListener("keydown", (event) => {
-    console.log(event.code);
     switch (event.code) {
         case "ArrowUp":
             if (snake.direction !== "Down") {
@@ -108,4 +116,12 @@ window.addEventListener("keydown", (event) => {
     move();
 });
 
-renderSnake();
+function placeFood() {
+    let x = Math.abs(Math.floor(Math.random() * playGroundSize));
+    let y = Math.abs(Math.floor(Math.random() * playGroundSize));
+
+    food.x = x;
+    food.y = y;
+}
+
+renderScene();
