@@ -3,59 +3,52 @@ const snake = {
     body: [],
     direction: "",
 };
-var food = { x: 20, y: 10 };
+const food = { x: 20, y: 10 };
 
-snake.body.push({ x: 5, y: 3 });
-snake.body.push({ x: 5, y: 4 });
-snake.body.push({ x: 5, y: 5 });
-snake.body.push({ x: 5, y: 6 });
-snake.body.push({ x: 5, y: 7 });
+// Initialize the snake's body with some initial positions
+for (let i = 3; i <= 7; i++) {
+    snake.body.push({ x: 5, y: i });
+}
 
 function calculateNextCell(direction) {
-    let nextPosition = { ...snake.body[0] };
+    const { x, y } = snake.body[0];
+    let nextX = x;
+    let nextY = y;
+
     switch (direction) {
         case "Up":
-            if (nextPosition.y === 1) {
-                nextPosition.y = playGroundSize;
-                break;
-            }
-            nextPosition.y--;
+            nextY = y === 1 ? playGroundSize : y - 1;
             break;
         case "Right":
-            if (nextPosition.x === playGroundSize) {
-                nextPosition.x = 1;
-                break;
-            }
-            nextPosition.x++;
+            nextX = x === playGroundSize ? 1 : x + 1;
             break;
         case "Down":
-            if (nextPosition.y === playGroundSize) {
-                nextPosition.y = 1;
-                break;
-            }
-            nextPosition.y++;
-
+            nextY = y === playGroundSize ? 1 : y + 1;
             break;
         case "Left":
-            if (nextPosition.x === 1) {
-                nextPosition.x = playGroundSize;
-                break;
-            }
-            nextPosition.x--;
-
-            break;
-        default:
+            nextX = x === 1 ? playGroundSize : x - 1;
             break;
     }
 
-    return nextPosition;
+    return { x: nextX, y: nextY };
 }
 
 function move() {
     const nextCell = calculateNextCell(snake.direction);
-    if (nextCell.x == food.x && nextCell.y == food.y) {
-        snake.body.unshift(nextCell);
+
+    if (nextCell.x === food.x && nextCell.y === food.y) {
         placeFood();
+        snake.body.unshift(nextCell);
+        renderScene();
+    }
+
+    if (
+        snake.body.some(
+            (segment) => segment.x === nextCell.x && segment.y === nextCell.y
+        )
+    ) {
+        console.log("hit");
+        return;
     }
 
     snake.body.unshift(nextCell);
@@ -66,21 +59,23 @@ function move() {
 
 function renderScene() {
     const playground = document.getElementById("playground");
-    let foodBlock = `<div style="\
-    left: ${getOffsets(food.x)}; \
-    top: ${getOffsets(food.y)};" \
-    class="food-block"></div>`;
-
     playground.innerHTML = "";
-    playground.insertAdjacentHTML("beforeend", foodBlock);
+
+    const foodBlock = createBlock(food.x, food.y, "food-block");
+    playground.appendChild(foodBlock);
 
     snake.body.forEach((segment) => {
-        let snakeBlock = `<div style="\
-        left: ${getOffsets(segment.x)}; \
-        top: ${getOffsets(segment.y)};" \
-        class="snake-block"></div>`;
-        playground.insertAdjacentHTML("beforeend", snakeBlock);
+        const snakeBlock = createBlock(segment.x, segment.y, "snake-block");
+        playground.appendChild(snakeBlock);
     });
+}
+
+function createBlock(x, y, className) {
+    const block = document.createElement("div");
+    block.style.left = getOffsets(x);
+    block.style.top = getOffsets(y);
+    block.className = className;
+    return block;
 }
 
 function getOffsets(offset) {
@@ -92,36 +87,39 @@ window.addEventListener("keydown", (event) => {
         case "ArrowUp":
             if (snake.direction !== "Down") {
                 snake.direction = "Up";
-            } else return;
-
+            }
             break;
         case "ArrowRight":
             if (snake.direction !== "Left") {
                 snake.direction = "Right";
-            } else return;
+            }
             break;
         case "ArrowDown":
             if (snake.direction !== "Up") {
                 snake.direction = "Down";
-            } else return;
+            }
             break;
         case "ArrowLeft":
             if (snake.direction !== "Right") {
                 snake.direction = "Left";
-            } else return;
+            }
             break;
         default:
             return;
     }
-    move();
+    //move();
 });
 
 function placeFood() {
-    let x = Math.abs(Math.floor(Math.random() * playGroundSize));
-    let y = Math.abs(Math.floor(Math.random() * playGroundSize));
+    const x = Math.floor(Math.random() * playGroundSize) + 1;
+    const y = Math.floor(Math.random() * playGroundSize) + 1;
 
     food.x = x;
     food.y = y;
 }
 
 renderScene();
+
+setInterval(() => {
+    move();
+}, 30);
