@@ -120,6 +120,6 @@ function placeFood() {
 
 renderScene();
 
-setInterval(() => {
+let interval = setInterval(() => {
     move();
-}, 30);
+}, 70);
