@@ -1,90 +1,111 @@
-const playGroundSize = { x: 10, y: 10 };
-var direction = 0;
+const playGroundSize = 10;
 const snake = {
-    headPos: {
-        x: 5,
-        y: 5,
-    },
     body: [],
-
-    move() {
-        switch (direction) {
-            case 1:
-                if (this.headPos.x === 0) this.headPos.x = 10;
-                this.headPos.x = 1 + (this.headPos.x % 10);
-                break;
-            case 2:
-                if (this.headPos.y === 0) this.headPos.y = 10;
-                this.headPos.y = 1 + (this.headPos.y % 10);
-
-                break;
-            case 3:
-                if (this.headPos.x == 10) this.headPos.x--;
-
-                this.headPos.x = Math.abs((this.headPos.x % 10) - 1);
-
-                if (this.headPos.x == 0) {
-                    this.headPos.x = 10;
-                }
-                break;
-            case 4:
-                if (this.headPos.y == 10) this.headPos.y--;
-
-                this.headPos.y = Math.abs((this.headPos.y % 10) - 1);
-                if (this.headPos.y == 0) {
-                    this.headPos.y = 10;
-                }
-
-                break;
-            default:
-                break;
-        }
-    },
+    direction: "",
 };
 
-function renderSnake() {
-    const renderBody = '<div class="snake-block"></div>';
-    for (var item of snake.body) {
-        const playground = document.getElementById("playground");
-        playground.innerHTML = "";
-        playground.insertAdjacentHTML("beforeend", renderBody);
+snake.body.push({ x: 5, y: 3 });
+snake.body.push({ x: 5, y: 4 });
+snake.body.push({ x: 5, y: 5 });
+snake.body.push({ x: 5, y: 6 });
+snake.body.push({ x: 5, y: 7 });
 
-        renderedBlock = document.querySelectorAll(".snake-block:last-child")[0];
+function calculateNextCell(direction) {
+    let nextPosition = { ...snake.body[0] };
+    console.log("head", nextPosition);
+    switch (direction) {
+        case "Up":
+            if (nextPosition.y === 1) {
+                nextPosition.y = playGroundSize;
+                break;
+            }
+            nextPosition.y--;
+            break;
+        case "Right":
+            if (nextPosition.x === playGroundSize) {
+                nextPosition.x = 1;
+                break;
+            }
+            nextPosition.x++;
+            break;
+        case "Down":
+            if (nextPosition.y === playGroundSize) {
+                nextPosition.y = 1;
+                break;
+            }
+            nextPosition.y++;
 
-        renderedBlock.style["top"] =
-            (
-                playground.offsetHeight -
-                item.x * (playground.offsetHeight / playGroundSize.x)
-            ).toString() + "px";
-        renderedBlock.style["left"] =
-            (
-                (item.y - 1) *
-                (playground.offsetWidth / playGroundSize.y)
-            ).toString() + "px";
+            break;
+        case "Left":
+            if (nextPosition.x === 1) {
+                nextPosition.x = playGroundSize;
+                break;
+            }
+            nextPosition.x--;
+
+            break;
+        default:
+            break;
     }
+    console.log("newhead", nextPosition);
+
+    return nextPosition;
 }
 
-window.addEventListener("keydown", function (event) {
-    switch (event.keyCode) {
-        case 37:
-            direction = 4;
+function move() {
+    const nextCell = calculateNextCell(snake.direction);
+    snake.body.unshift(nextCell);
+    snake.body.pop();
+    renderSnake();
+}
+
+function renderSnake() {
+    const playground = document.getElementById("playground");
+    playground.innerHTML = "";
+
+    snake.body.forEach((segment, index) => {
+        const renderBody = `<div class="snake-block">${index + 1}</div>`;
+        playground.insertAdjacentHTML("beforeend", renderBody);
+        const renderedBlock = document.querySelectorAll(
+            ".snake-block:last-child"
+        )[0];
+
+        const topPosition = (segment.x - 1) * (100 / playGroundSize) + "%";
+        const leftPosition = (segment.y - 1) * (100 / playGroundSize) + "%";
+
+        renderedBlock.style.left = topPosition;
+        renderedBlock.style.top = leftPosition;
+    });
+}
+
+window.addEventListener("keydown", (event) => {
+    console.log(event.code);
+    switch (event.code) {
+        case "ArrowUp":
+            if (snake.direction !== "Down") {
+                snake.direction = "Up";
+            } else return;
+
             break;
-        case 38:
-            direction = 1;
+        case "ArrowRight":
+            if (snake.direction !== "Left") {
+                snake.direction = "Right";
+            } else return;
             break;
-        case 39:
-            direction = 2;
+        case "ArrowDown":
+            if (snake.direction !== "Up") {
+                snake.direction = "Down";
+            } else return;
             break;
-        case 40:
-            direction = 3;
+        case "ArrowLeft":
+            if (snake.direction !== "Right") {
+                snake.direction = "Left";
+            } else return;
             break;
         default:
             return;
     }
-    console.log(event.keyCode, snake.headPos, direction);
-
-    snake.move();
-    renderSnake();
+    move();
 });
-snake.body.push(snake.headPos);
+
 renderSnake();

@@ -2,14 +2,21 @@ body {
     margin: 0;
     padding: 0;
 }
+
 #playground {
     margin: 0 auto;
     width: 50vw;
     height: 100vh;
     background-color: aquamarine;
-}
-.snake-block {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     position: relative;
+}
+
+.snake-block {
+    position: absolute;
+    display: block;
     width: 10%;
     height: 10%;
     background-color: green;
